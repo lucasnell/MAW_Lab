@@ -25,11 +25,11 @@ genome (full path denoted as `/path/to/stick_assem`). *Note*: This guide assumes
 naming of fastq files matches that in "Basic DNA-seq" guide.
 
 
-## Alignment using tophat
+# Alignment using tophat
 
 Aligning to bowtie2 build using 12 cores, doing it differently depending on whether 
 reads are paired-end. If they're paired, I also had to sort by name because `htseq` 
-is bugy when you try to run it on position-sorted bam files for paired-end reads.
+is buggy when you try to run it on position-sorted bam files for paired-end reads.
 ``` {bash}
 cd /RNA-seq/fastq/path/examp_samp
 
@@ -57,8 +57,8 @@ fi
 samtools index -b accepted_hits.bam
 ```
 
-Some of our samples (James Urton's from Lake Washington) used Solexa scale 1.3 quality 
-scoring, so I included `--solexa1.3-quals` in the tophat command when doing all of
+Some of our samples used Solexa scale 1.3 quality scoring, so I included 
+`--solexa1.3-quals` in the tophat command when doing all of
 those alignments.
 
 

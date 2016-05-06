@@ -26,12 +26,13 @@ chromosome X (`chrX`).
 
 # Downloading from SRA and converting to fastq
 
-The following `python3` script---executed via the command line---will use multiple cores
-to download sra files from the Sequence Read Archive (SRA) database and convert them to 
-fastq files.
+The following `python3` script---executed as an executable script---will use multiple 
+cores to download sra files from the Sequence Read Archive (SRA) database and convert 
+them to fastq files.
 The file `fetch.txt` contains all accession numbers for `examp_samp` (one per line) and is
 obtained from the SRA website.
-Ideally, you'd have the same number of available cores as accession numbers for that sample, but `Pool` will work with whatever number cores you allow. 
+Ideally, you'd have the same number of available cores as accession numbers for that 
+sample, but `Pool` will work with whatever number cores you allow. 
 (Make sure you make the script executable via `chmod +x /path/to/python/script.py`.)
 
 ```{python}
