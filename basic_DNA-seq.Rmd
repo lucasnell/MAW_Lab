@@ -1,0 +1,167 @@
+---
+title: "Basic DNA-seq"
+author: "Lucas A. Nell"
+date: "May 6, 2016"
+output:
+  html_document:
+    highlight: haddock
+    theme: journal
+  pdf_document:
+    highlight: haddock
+    latex_engine: xelatex
+    number_sections: yes
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+This is a basic pipeline for DNA-seq data. All of the below code is for a mouse sample
+(`examp_samp`) aligned to the mouse chromosome X (`chrX`).
+
+
+# Downloading
+
+To download from the Sequence Read Archive (SRA), I first select and save all accession
+numbers for a given sample to a file I'll call `fetch.txt` (one accession per line). 
+Below shows how to download all relevant sra files to a given directory. I use `wget` 
+instead of any tools from  SRA because the latter (even `fastq-dump` when used with an 
+SRA accession number) automatically downloads to `~/ncbi/public/sra`; `wget` allows 
+me to download the sra files to wherever I want.
+
+``` {bash}
+cd /DNA-seq/fastq/path/examp_samp
+
+# Root directory for SRA database
+export ftproot=ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra
+
+while read -r line
+do
+    accession="$line"
+    pre="${line:0:3}"
+    mid="${line:0:6}"
+    wget ${ftproot}/${pre}/${mid}/${accession}/${accession}.sra
+done < ${fetch}
+```
+
+
+# Converting to gzipped fastq files
+
+Then I run SRA's `fastq-dump` on the sra files to convert them to gzipped fastq files.
+I do this the same for both paired- and single-end reads.
+
+```{bash}
+# module load sratoolkit/latest # Uncomment if on UGA's Sapelo cluster
+for f in *sra;
+do
+    fastq-dump --split-files --gzip $f
+done
+```
+
+I put all fastq files for a given sample into a separate folder so I don't have
+to constantly look up what accessions match what sample.
+
+
+# Alignment
+
+I used `bowtie2` for alignments. I'll set how many cores I have available (`cores`) 
+and whether to filter by MAPQ score (`mapFilter`).
+
+``` {bash}
+export cores=12
+export mapFilter=true
+```
+
+
+
+### Build
+
+I first built the assembly for `bowtie2`.
+
+``` {bash}
+# module load bowtie2/latest # Uncomment if on UGA's Sapelo cluster
+cd /bowtie2/build/path
+mkdir chrX
+cd ./chrX
+bowtie2-build -f /fasta/path/chrX.fa chrX
+```
+
+
+### Align
+
+I need comma-separated lists of fastq files for bowtie2, but if they're paired-end reads
+I need separate lists for reads 1 and 2, in the same order. Since I use the 
+`--split-files` option in `fastq-dump` for all samples, I know that there are some fastq
+files ending in `_1.fastq.gz` in the sample's fastq directory even if the sample has 
+single-end reads.
+``` {bash}
+cd /DNA-seq/fastq/path/examp_samp
+export read1_list=`ls -m *_1.fastq.gz | tr -d ' \n'`
+```
+
+*Note*: If you didn't get your fastq files from SRA, make sure that yours conform to the 
+following conventions: 
+
+(1) All files must be gzipped
+(2) for single-end reads, make all files end in `_1.fastq.gz`
+(3) for paired-end reads, make files for mate 1s end in `_1.fastq.gz`, and 
+`_2.fastq.gz` for mate 2s files
+
+If these conditions aren't met, you should change all scripts herein accordingly.
+
+
+Now I can check whether there are any `*_2.fastq.gz` files, which would indicate these 
+are paired-end reads. I'll run things differently depending on "paired-edness".
+
+``` {bash}
+# module load bowtie2/latest # Uncomment if on UGA's Sapelo cluster
+shopt -s nullglob
+set -- *_2.fastq.gz
+if [ "$#" -gt 0 ]
+then
+  export read2_list=`ls -m *_2.fastq.gz | tr -d ' \n'`
+  bowtie2 -p ${cores} --no-unal -x /bowtie2/build/path/chrX/chrX \
+    -1 ${read1_list} \
+    -2 ${read2_list} \
+    -S /DNA-seq/sam/directory/examp_samp.sam
+else
+    bowtie2 -p ${cores} --no-unal -x /bowtie2/build/path/chrX/chrX \
+    -U ${read1_list} \
+    -S /DNA-seq/sam/directory/examp_samp.sam
+fi
+```
+
+
+
+### Sort, index
+Converting to a BAM file, then sorting by position and indexing.
+
+``` {bash}
+# module load samtools/latest # Uncomment if on UGA's Sapelo cluster
+cd /DNA-seq/sam/directory
+samtools view -bh -@ $(expr ${cores} - 1) examp_samp.sam > examp_samp.bam
+samtools sort -o examp_samp_sorted.bam -T examp_samp_s -@ ${cores} examp_samp.bam
+# I never use non-sorted bam files...
+mv examp_samp_sorted.bam examp_samp.bam
+samtools index -b examp_samp.bam
+```
+
+### Filtering
+
+Filter by whether MAPQ score ≥ 20.
+
+``` {bash}
+if [ ${mapFilter} = true ]
+then
+    samtools view -bh -q 20 -@ $(expr ${cores} - 1) examp_samp.bam > examp_samp_q.bam
+    samtools index -b examp_samp_q.bam
+fi
+```
+
+
+<!---
+# For converting to html or pdf files:
+rmarkdown::render('basic_DNA-seq.Rmd')
+rmarkdown::render('basic_DNA-seq.Rmd', 'pdf_document')
+-->

@@ -1,0 +1,98 @@
+---
+title: "Multithreaded DNA-seq"
+author: "Lucas A. Nell"
+date: "April 8, 2016"
+output:
+  html_document:
+    highlight: haddock
+    theme: journal
+  pdf_document:
+    highlight: haddock
+    latex_engine: xelatex
+    number_sections: yes
+# runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+This is a partial multithreaded pipeline for DNA-seq data. Many tools, such as `bowtie2` 
+and `samtools`, already allow for multithreaded processing. This guide is to facilitate 
+multithreaded workflows that include those "other" programs.
+
+All of the below code is for a mouse sample (`examp_samp`) aligned to the mouse 
+chromosome X (`chrX`).
+
+# Downloading from SRA and converting to fastq
+
+The following `python3` script---executed via the command line---will use multiple cores
+to download sra files from the Sequence Read Archive (SRA) database and convert them to 
+fastq files.
+The file `fetch.txt` contains all accession numbers for `examp_samp` (one per line) and is
+obtained from the SRA website.
+Ideally, you'd have the same number of available cores as accession numbers for that sample, but `Pool` will work with whatever number cores you allow. 
+(Make sure you make the script executable via `chmod +x /path/to/python/script.py`.)
+
+```{python}
+#!/usr/bin/env python3
+"""For a given sample, download and convert sra files to gzipped fastq files."""
+
+from multiprocessing import Pool
+import argparse as ap
+import os
+
+# Setting up the "parser" that parses command-line inputs
+Parser = ap.ArgumentParser(description = 'Multicore SRA downloading, processing.')
+Parser.add_argument('-f', '--fetch', required = True, help = 'path to fetch file')
+Parser.add_argument('-d', '--saveDir', required = True, 
+                    help = 'directory in which to save fastq files')
+Parser.add_argument('-c', '--cores', type = int, default = 1, help = 'available cores')
+
+# Now reading the arguments
+args = vars(Parser.parse_args())
+fetch = args['fetch']
+saveDir = args['saveDir']
+cores = args['cores']
+
+# Getting accessions from fetch file (all non-empty lines)
+accessions = []
+with open(fetch) as f:
+    for line in f:
+        if not line.startswith('\n'):
+            accessions += [line.strip()]
+
+os.chdir(saveDir)
+
+# Download all sra files
+
+def downloadSRA(accession):
+  """Download sra file directly from SRA ftp via wget."""
+  SRAftp = \
+  'ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/%s/%s/%s/%s.sra'
+  fullAddress = SRAftp % (accession[:3], accession[:6], accession, accession)
+  os.system('wget ' + fullAddress)
+  return
+
+with Pool(processes = cores) as pool:
+  pool.map(downloadSRA, accessions)
+
+# Convert all sra files to fastq
+
+def sraToFastq(sraFile):
+  """Convert sra file to gzipped fastq file."""
+  command = 'fastq-dump --split-files --gzip %(s)s && rm %(s)s' % {'s': sraFile}
+  os.system(command)
+  return
+
+sraFiles = [x for x in os.listdir() if x.endswith('.sra')]
+
+with Pool(processes = cores) as pool:
+  pool.map(sraToFastq, sraFiles)
+```
+
+An example of running this script on `examp_samp` using 20 cores:
+```{bash} 
+/path/to/python/script.py -f /path/to/fetch.txt -d /DNA-seq/fastq/path/examp_samp -c 20
+```
+

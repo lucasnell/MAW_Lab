@@ -1,0 +1,77 @@
+---
+title: "Basic RNA-seq"
+author: "Lucas A. Nell"
+date: "March 31, 2016"
+output:
+  html_document:
+    highlight: haddock
+    theme: journal
+  pdf_document:
+    highlight: haddock
+    latex_engine: xelatex
+geometry: margin=1in
+fontsize: 12pt
+mainfont: Helvetica
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+This is a basic pipeline for RNA-seq data. All of the below code is for a stickleback
+sample (`examp_samp`) aligned to a previously built bowtie2 build for the entire
+genome (full path denoted as `/path/to/stick_assem`). *Note*: This guide assumes your 
+naming of fastq files matches that in "Basic DNA-seq" guide.
+
+
+## Alignment using tophat
+
+Aligning to bowtie2 build using 12 cores, doing it differently depending on whether 
+reads are paired-end. If they're paired, I also had to sort by name because `htseq` 
+is bugy when you try to run it on position-sorted bam files for paired-end reads.
+``` {bash}
+cd /RNA-seq/fastq/path/examp_samp
+
+# If using DNA-seq naming, all folders should have fastq files matching *_1.fastq.gz
+export read1_list=`ls -m *_1.fastq.gz | tr -d ' \n'`
+
+# Any files matching *_2.fastq.gz inside a folder indicates paired-end reads
+shopt -s nullglob
+set -- *_2.fastq.gz
+if [ "$#" -gt 0 ]
+then
+  export read2_list=`ls -m *_2.fastq.gz | tr -d ' \n'`
+  tophat --output-dir /tophat/output/path/examp_samp --num-threads 12 \
+    /path/to/stick_assem ${read1_list} ${read2_list}
+  cd /tophat/output/path/examp_samp
+  samtools sort -n -@ 12 -m 2G -o name_sort_accepted_hits.bam \
+    -T accepted_hits_tmp accepted_hits.bam
+else
+  tophat --output-dir /tophat/output/path/examp_samp --num-threads 12 \
+    /path/to/stick_assem ${read1_list}
+  cd /tophat/output/path/examp_samp
+fi
+
+# Now to index the position-sorted bam file
+samtools index -b accepted_hits.bam
+```
+
+Some of our samples (James Urton's from Lake Washington) used Solexa scale 1.3 quality 
+scoring, so I included `--solexa1.3-quals` in the tophat command when doing all of
+those alignments.
+
+
+## Next step(s) along pipeline
+
+The next steps for RNA-seq data depend on your goals:
+
+- Expression analyses by genes/transcripts/exons: `cufflinks` --> `htseq`
+- Coverage along chromosome position: `mpileup`
+
+
+
+
+
+
+
