@@ -5,7 +5,7 @@ date: "March 31, 2016"
 output:
   html_document:
     highlight: haddock
-    theme: journal
+    theme: spacelab
   pdf_document:
     highlight: haddock
     latex_engine: xelatex
