@@ -96,7 +96,7 @@ do
     mv ${ff} ${f}
 done
 
-# Re-compress them
+# Re-compress them (this will take a while!)
 for f in *fastq; do gzip $f; done
 ```
 
@@ -104,6 +104,33 @@ for f in *fastq; do gzip $f; done
 
 Aligning was done using `bowtie`, the same as for DNA-seq data. See `basic_DNA-seq.Rmd`
 for details.
+
+
+
+# Stacking
+
+First we had to create stacks from the aligned BAM files using Stacks' `sstacks`. Because
+BAM names included a unique integer after the first underscore, I used that for the id.
+
+```{bash sstack}
+cd /path/to/bam
+export numThreads=12
+export outPath=/path/to/stacks/
+
+for bam in *.bam
+do
+    tmp=($(echo ${bam/%.bam/} | tr '_' ' '))
+    id=${tmp[1]}
+    /usr/local/apps/stacks/latest/bin/pstacks -t bam \
+        -f ${bam} \
+        -o ${outPath} \
+        -i ${id} \
+        -p ${numThreads} &> ./logs/pstacks_${id}.log
+done
+```
+
+
+
 
 
 
