@@ -109,7 +109,9 @@ for details.
 
 # Stacking
 
-First we had to create stacks from the aligned BAM files using Stacks' `sstacks`. Because
+## Create stacks
+
+First we had to create stacks from the aligned BAM files using Stacks' `pstacks`. Because
 BAM names included a unique integer after the first underscore, I used that for the id.
 
 ```{bash sstack}
@@ -129,9 +131,45 @@ do
 done
 ```
 
+## Create stack catalog
+
+Creating catalog using `cstacks`.
+
+```{bash cstack}
+cd /path/to/stacks
+export numThreads=12
+export outPath=./catalog/
+
+pStacks=(`ls *.tags.tsv.gz | sed 's/.tags.tsv.gz//g'`)
+export pStacks=${pStacks[@]/#/' -s '}
+
+/usr/local/apps/stacks/latest/bin/cstacks \
+    -b 1 \
+    ${pStacks} \
+    -o ${outPath} \
+    -p ${numThreads} &> ${outPath}/catalog.log
+```
 
 
 
+## Search all samples against catalog
 
+Search all samples from the `pstacks` step against catalog, using `sstacks`.
 
+```{bash sstack}
+cd /path/to/stacks
+export numThreads=12
+export outPath=./sets/
+export catalogFile=./catalog/batch_1
+
+pStacks=(`ls *.tags.tsv.gz | sed 's/.tags.tsv.gz//g'`)
+export pStacks=${pStacks[@]/#/' -s '}
+
+/usr/local/apps/stacks/latest/bin/sstacks \
+    -b 1 \
+    -c ${catalogFile} \
+    ${pStacks} \
+    -o ${outPath} \
+    -p ${numThreads} &> ${outPath}/search.log
+```
 

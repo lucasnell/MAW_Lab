@@ -1,0 +1,113 @@
+---
+title: "DNA extractions using the *E.Z.N.A.* kit"
+author: "Lucas A. Nell"
+date: "May 6, 2016"
+output:
+  html_document:
+    highlight: haddock
+    theme: journal
+  pdf_document:
+    highlight: haddock
+    latex_engine: xelatex
+    number_sections: yes
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+
+Modified instructions specific for extracting DNA from mouse liver samples
+-------
+
+
+### Part 1
+
+#### Before beginning:
+- Set heat block to 55ºC.
+- Fill an ice pan with ice.
+
+#### Instructions:
+
+#.  Transfer ~20 mg tissue to a 1.5 mL microcentrifuge tube. Keep sample in ice pan when 
+    not in use.
+#.  Add 200 µL TL Buffer.
+#.  Grind sample using disposable pestle and motor.
+#.  Add 25 µL OB Protease Solution. Vortex to mix thoroughly.
+#.  Incubate at 55°C in the heat block, and vortex the sample every 20-30 minutes (when 
+    possible). Allow samples to incubate overnight, or at least 3 hours if you're in a 
+    rush.
+
+
+### Part 2
+
+#### Before beginning (allow ~1 hr):
+
+- Set water bath to 70ºC, fill with dH<sub>2</sub>O, and allow it to reach 70ºC.
+- Vortex Elution Buffer and transfer enough of it for all samples ([# samples $+$ 1]
+  $\times$ 100µL) to microcentrifuge tube(s). Place in heated water bath.
+- Dilute HBC Buffer with isopropanol (see bottle for instructions).
+- Dilute DNA Wash Buffer with ethanol (see bottle for instructions).
+
+
+
+#### Instructions:
+
+*Note*: "HiBind DNA Mini Column" and "Collection Tube" are those provided in the 
+*E.Z.N.A.* kit.
+
+
+#.  Remove samples from heat block, vortex to mix, and briefly spin down to remove
+    moisture from inside of the lid.
+    
+#.  Add 5 µL RNase A, and let sit at room temperature for 2 minutes.
+
+#.  Centrifuge at maximum speed (≥10,000 $\times$ *g*) for 5 minutes at room temperature.
+
+#.  Transfer the supernatant to a sterile 1.5 mL microcentrifuge tube. Do not disturb or
+    transfer any of the insoluble pellet.
+
+#.  Add 220 µL BL Buffer. Vortex to mix thoroughly. A wispy precipitate may form upon the
+    addition of BL Buffer. This does not interfere with DNA recovery.
+
+#.  Incubate at 70°C in water bath for 10 minutes.
+
+#.  Add 220 µL 100% ethanol. Vortex to mix thoroughly.
+
+#.  Insert a HiBind DNA Mini Column into a 2 mL Collection Tube.
+
+#.  Transfer the entire sample in the microcentrifuge tube to the HiBind DNA Mini Column,
+    including any precipitates that may have formed.
+
+#.  Centrifuge at maximum speed for 1 minute. Discard the filtrate; reuse the 
+    collection tube.
+
+#.  Add 500 µL HBC Buffer.
+
+#.  Centrifuge at maximum speed for 30 seconds. Discard the filtrate *and* collection 
+    tube.
+
+#.  Insert the HiBind DNA Mini Column into a new 2 mL Collection Tube.
+
+#.  DNA wash:
+    a. Add 700 µL DNA Wash Buffer. 
+    b. Centrifuge at maximum speed for 30 seconds.
+    c. Discard the filtrate; reuse the collection tube.
+
+#.  *Run a second DNA wash.*
+
+#.  Centrifuge the empty HiBind DNA Mini Column at maximum speed for 2 minutes to dry the
+    column. This step is critical for removal of trace ethanol that may interfere with
+    downstream applications.
+
+#.  Transfer the HiBind DNA Mini Column into a nuclease-free 1.5 mL microcentrifuge tube.
+
+#.  DNA elution:
+    a. Add 50 µL Elution Buffer heated to 70°C.
+    b. Let sit at room temperature for 2 minutes. 
+    c. Centrifuge at maximum speed for 1 minute.
+
+#.  *Run a second DNA elution.*
+
+#.  Store eluted DNA at -20°C.
