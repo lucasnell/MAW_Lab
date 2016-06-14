@@ -1,0 +1,99 @@
+---
+title: "RADseq Stacks"
+subtitle: "Mouse GBS using Stacks"
+author: "Lucas A. Nell"
+date: "June 8, 2016"
+output:
+  html_document:
+    highlight: haddock
+    theme: default
+  pdf_document:
+    highlight: haddock
+    latex_engine: xelatex
+geometry: margin=1in
+fontsize: 12pt
+mainfont: Helvetica
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+
+# Initial steps
+
+It's assumed that all steps from `RADseq_base.Rmd` have been carried out.
+
+
+# Stacking
+
+## Create stacks
+
+First we had to create stacks from the aligned BAM files using Stacks' `pstacks`. Because
+BAM names included a unique integer after the first underscore, I used that for the id.
+
+> Stacks doesn't appear to be very efficient at running multithreaded jobs, so I 
+> recommend using something like Python's `multiprocessing` module to run `pstacks` on
+> multiple files at once.
+
+```{r pstack, engine = 'bash'}
+cd /path/to/bam
+export numThreads=12
+export outPath=/path/to/stacks/
+
+for bam in *.bam
+do
+    tmp=(`echo ${bam/%.bam/} | tr '_' ' '`)
+    id=${tmp[1]}
+    /usr/local/apps/stacks/latest/bin/pstacks -t bam \
+        -f ${bam} \
+        -o ${outPath} \
+        -i ${id} \
+        -p ${numThreads} &> ./logs/pstacks_${id}.log
+done
+```
+
+## Create stack catalog
+
+Creating catalog using `cstacks`.
+
+```{r cstack, engine = 'bash'}
+cd /path/to/stacks
+export numThreads=12
+export outPath=./catalog/
+
+pStacks=(`ls *.tags.tsv.gz | sed 's/.tags.tsv.gz//g'`)
+export pStacks=${pStacks[@]/#/' -s '}
+
+/usr/local/apps/stacks/latest/bin/cstacks \
+    -b 1 \
+    ${pStacks} \
+    -o ${outPath} \
+    -p ${numThreads} &> ${outPath}/catalog.log
+```
+
+
+
+## Search all samples against catalog
+
+Search all samples from the `pstacks` step against catalog, using `sstacks`.
+
+```{r sstack, engine = 'bash'}
+cd /path/to/stacks
+export numThreads=12
+export outPath=./sets/
+export catalogFile=./catalog/batch_1
+
+pStacks=(`ls *.tags.tsv.gz | sed 's/.tags.tsv.gz//g'`)
+export pStacks=${pStacks[@]/#/' -s '}
+
+/usr/local/apps/stacks/latest/bin/sstacks \
+    -b 1 \
+    -c ${catalogFile} \
+    ${pStacks} \
+    -o ${outPath} \
+    -p ${numThreads} &> ${outPath}/search.log
+```
+
+

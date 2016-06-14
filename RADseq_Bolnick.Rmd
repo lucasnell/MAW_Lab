@@ -1,0 +1,28 @@
+---
+title: "RADseq Bolnick"
+subtitle: "Mouse GBS using Dan Bolnick's pipeline"
+author: "Lucas A. Nell"
+date: "June 8, 2016"
+output:
+  html_document:
+    highlight: haddock
+    theme: default
+  pdf_document:
+    highlight: haddock
+    latex_engine: xelatex
+geometry: margin=1in
+fontsize: 12pt
+mainfont: Helvetica
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+# Initial steps
+
+It's assumed that all steps from `RADseq_base.Rmd` have been carried out.
+
+
+# 
