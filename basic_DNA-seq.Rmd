@@ -65,12 +65,14 @@ to constantly look up what accessions match what sample.
 
 # Alignment
 
-I used `bowtie2` for alignments. I'll set how many cores I have available (`cores`) 
-and whether to filter by MAPQ score (`mapFilter`).
+I used `bowtie2` for alignments. I'll set how many cores I have available (`cores`),
+whether to filter by MAPQ score (`mapFilter`), and the sequencing run number (`runNum`;
+if you don't know this, you can just leave it as `999`).
 
 ``` {bash}
 export cores=12
 export mapFilter=true
+export runNum=999
 ```
 
 
@@ -114,6 +116,10 @@ If these conditions aren't met, you should change all scripts herein accordingly
 Now I can check whether there are any `*_2.fastq.gz` files, which would indicate these 
 are paired-end reads. I'll run things differently depending on "paired-edness".
 
+The options starting with `--rg` specify aspects of the read group, which would allow us
+to skip adding read groups using PICARD. 
+Thus this would save time if specified in pipelines utilizing GATK program(s).
+
 ``` {bash}
 # module load bowtie2/latest # Uncomment if on UGA's Sapelo cluster
 shopt -s nullglob
@@ -124,10 +130,18 @@ then
   bowtie2 -p ${cores} --no-unal -x /bowtie2/build/path/chrX/chrX \
     -1 ${read1_list} \
     -2 ${read2_list} \
+    --rg-id examp_samp_${runNum} \
+    --rg SM:examp_samp \
+    --rg PL:ILLUMINA \
+    --rg LB:${runNum} \
     -S /DNA-seq/sam/directory/examp_samp.sam
 else
     bowtie2 -p ${cores} --no-unal -x /bowtie2/build/path/chrX/chrX \
     -U ${read1_list} \
+    --rg-id examp_samp_${runNum} \
+    --rg SM:examp_samp \
+    --rg PL:ILLUMINA \
+    --rg LB:${runNum} \
     -S /DNA-seq/sam/directory/examp_samp.sam
 fi
 ```
