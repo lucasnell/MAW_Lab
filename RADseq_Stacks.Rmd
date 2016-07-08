@@ -21,6 +21,21 @@ knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ```
 
 
+# Update
+
+As of June 2016, this is no longer the most updated version. 
+Following links to shell scripts for
+[making](https://github.com/lucasnell/musGBS/blob/master/make_stacks.sh),
+[cataloging](https://github.com/lucasnell/musGBS/blob/master/catalog_stacks.sh),
+and [calling](https://github.com/lucasnell/musGBS/blob/master/call_stacks.sh)
+stacks.
+
+(I've left the old code commented below, so to view it, look at the "Raw" version of this
+file on GitHub.)
+
+
+
+<!---
 # Initial steps
 
 It's assumed that all steps from `RADseq_base.Rmd` have been carried out.
@@ -96,4 +111,4 @@ export pStacks=${pStacks[@]/#/' -s '}
     -p ${numThreads} &> ${outPath}/search.log
 ```
 
-
+-->

@@ -20,9 +20,10 @@ runtime: shiny
 knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ```
 
-# Initial steps
 
-It's assumed that all steps from `RADseq_base.Rmd` have been carried out.
+# Update
 
+As of June 2016, this is no longer the most updated version. See 
+[here](https://github.com/lucasnell/musGBS/blob/master/Bolnick_pipe.md)
+for newer instructions.
 
-# 

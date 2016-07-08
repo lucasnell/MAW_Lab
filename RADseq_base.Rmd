@@ -21,6 +21,19 @@ knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ```
 
 
+
+# Update
+
+As of June 2016, this is no longer the most updated version. See 
+[here](https://github.com/lucasnell/musGBS/blob/master/initial_processing.md)
+for newer instructions.
+
+(I've left the old code commented below, so to view it, look at the "Raw" version of this
+file on GitHub.)
+
+
+
+<!---
 # Demultiplex
 
 I used `process_radtags` from [Stacks](http://catchenlab.life.illinois.edu/stacks/).
@@ -106,4 +119,6 @@ done
 Aligning was done using `bowtie2`, the same as for DNAseq data. See `basic_DNA-seq.Rmd`
 for details.
 
+
+-->
 
